@@ -124,9 +124,13 @@ const Form = ({ mode }: FormProps) => {
       if (confirm) {
         navigate("/signup");
       }
+    }else{
+      localStorage.setItem("usuarioLogado", userExist.email as string);
+      alert("Login efetuado com sucesso");
+      setTimeout(() => {
+      navigate("/home");
+    }, 1500);
     }
-    //vou gravar a usuario que se logou
-    localStorage.setItem("usuarioLogado", userExist?.email as string);
   };
 
   const clearInputs = () => {
