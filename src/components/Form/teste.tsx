@@ -2,10 +2,21 @@ import React, { useState, useEffect } from "react";
 import { Stack, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import InputDefault, { Name } from "../InputDefault";
-import { User } from "../../types/userType";
 
 interface FormProps {
   mode: "login" | "signup";
+}
+
+interface Recado {
+  id: string;
+  description: string;
+  detail: string;
+}
+
+interface User {
+  email: string;
+  password: string;
+  recados: Recado[];
 }
 
 const Form = ({ mode }: FormProps) => {
@@ -14,11 +25,11 @@ const Form = ({ mode }: FormProps) => {
   const [password, setPassword] = useState("");
   const [repassword, setRepassword] = useState("");
 
-  const [errorEmail, setErrorEmail] = useState(false);
-  const [errorPassword, setErrorPassword] = useState(false);
+  const [errorEmail, setErrorEmail] = useState(true);
+  const [errorPassword, setErrorPassword] = useState(true);
 
   const [listaUsuarios, setListaUsuarios] = useState<User[]>(
-    JSON.parse(localStorage.getItem("listaUser") ?? "[]")
+    JSON.parse(localStorage.getItem("listaUsuarios") ?? "[]")
   );
 
   const outraPagina = () => {
@@ -29,8 +40,6 @@ const Form = ({ mode }: FormProps) => {
     }
   };
 
-  //eu pego o valor digitado e pego o nome do campo
-  //do tipo Name so pode receber os valores que estão nesse type, dai o massa é porque vai mudar o estado somente daquele cara que foi digitado
   const mudarInput = (value: string, key: Name) => {
     //faço o switch pra nao pegar todos diretamente
     switch (key) {
@@ -55,29 +64,18 @@ const Form = ({ mode }: FormProps) => {
       setErrorEmail(false);
     }
 
-    if (mode === "signup") {
-      if (
-        !password ||
-        !repassword ||
-        password.length < 3 ||
-        password !== repassword
-      ) {
-        //so para mudar a cor
-        setErrorPassword(true);
-      } else {
-        setErrorPassword(false);
-      }
+    if (
+      !password ||
+      !repassword ||
+      password.length < 3 ||
+      password !== repassword
+    ) {
+      //so para mudar a cor
+      setErrorPassword(true);
+    } else {
+      setErrorPassword(false);
     }
-
-    if (mode === "login") {
-      if (!password) {
-        //so para mudar a cor
-        setErrorPassword(true);
-      } else {
-        setErrorPassword(false);
-      }
-    }
-  }, [email, password, repassword, mode]);
+  }, [email, password, repassword]);
 
   const createAccount = () => {
     const newUser = {
@@ -85,61 +83,28 @@ const Form = ({ mode }: FormProps) => {
       password,
       recados: [],
     };
-    console.log(newUser);
-    //aqui eu atualizo a lista
-    //NAO USAMOS AQUI O GRAVAR NO LOCALSTORAGE PORQUE AQUI O PRIMEIRO SERÁ UMA LISTA VAZIA, ENTAO FAREMOS NO USEEFFECT
-    //pegando o que ja tinha e adicionando no final
-    /**ou setListaUsuarios(
-     *  (prev)=>[...prev, newUser] da no mesmo acima
-     * ) */
-    const userExists = listaUsuarios.some(
-      (user) => user.email === newUser.email
-    );
-    if (!userExists) {
+    //(copiamos o que ja tem na lista, e adicionamos mais um valor no final do estado)
+    setListaUsuarios([...listaUsuarios, newUser]);//depois apaga por causa do if abaixo
+    //ou setListaUsuarios((prev)=>[...prev, newUser]); que é a mesama coisa de cima
+    const useExist = listaUsuarios.some((user) => user.email === newUser.email);
+    if (!useExist) {
       setListaUsuarios([...listaUsuarios, newUser]);
-      clearInputs();
-      alert("Usuário cadastrado com sucesso!");
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      alert("usuario cadastrado! Você será redirecionado");
+      setTimeout(() => {navigate("/")}, 1500)
     } else {
-      alert("Email já em uso!");
+      alert("email já em uso");
     }
   };
-
-  //pois a logica é, quando mudar o listaUsuarios, dai ele muda o localStorage
-  //aqui eu seto no localstorage quando ela atualizar
+  //crie um outro useEffect so para salvar e atualizar o localstorag quando criar as contas
   useEffect(() => {
-    localStorage.setItem("listaUser", JSON.stringify(listaUsuarios));
+    localStorage.setItem("listaUsers", JSON.stringify(listaUsuarios));
   }, [listaUsuarios]);
-
-  const login = () => {
-    const userExist = listaUsuarios.find(
-      (user) => user.email === email && user.password === password
-    );
-    if (!userExist) {
-      const confirm = window.confirm(
-        "Usuário não cadastrado, Deseja cadastar uma conta?"
-      );
-      if (confirm) {
-        navigate("/signup");
-      }
-    }
-    //vou gravar a usuario que se logou
-    localStorage.setItem("usuarioLogado", userExist?.email as string);
-  };
-
-  const clearInputs = () => {
-    setEmail("");
-    setPassword("");
-    setRepassword("");
-  };
 
   return (
     <React.Fragment>
       {" "}
       <Stack spacing={2}>
-        {mode === "login" && (
+        {mode == "login" && (
           <>
             <InputDefault
               name='email'
@@ -157,7 +122,7 @@ const Form = ({ mode }: FormProps) => {
               color={errorPassword ? "error" : "secondary"}
               handleChange={mudarInput}
             />
-            <Button variant='contained' color='success' onClick={login}>
+            <Button variant='contained' color='success'>
               Logar
             </Button>
             <Typography>
@@ -167,13 +132,13 @@ const Form = ({ mode }: FormProps) => {
                 variant='caption'
                 onClick={() => outraPagina()}
               >
-                Cadastre-se
+                Cadastra-se
               </Typography>
             </Typography>
           </>
         )}
 
-        {mode === "signup" && (
+        {mode == "signup" && (
           <>
             <InputDefault
               name='email'
