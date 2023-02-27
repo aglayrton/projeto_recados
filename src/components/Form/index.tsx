@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Stack, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import InputDefault, { Name } from "../InputDefault";
+import { User } from "../../types/userType";
 
 interface FormProps {
   mode: "login" | "signup";
@@ -15,6 +16,10 @@ const Form = ({ mode }: FormProps) => {
 
   const [errorEmail, setErrorEmail] = useState(false);
   const [errorPassword, setErrorPassword] = useState(false);
+
+  const [listaUsuarios, setListaUsuarios] = useState<User[]>(
+    JSON.parse(localStorage.getItem("listaUser") ?? "[]")
+  );
 
   const outraPagina = () => {
     if (mode === "login") {
@@ -65,9 +70,7 @@ const Form = ({ mode }: FormProps) => {
     }
 
     if (mode === "login") {
-      if (
-        !password
-      ) {
+      if (!password) {
         //so para mudar a cor
         setErrorPassword(true);
       } else {
@@ -83,13 +86,46 @@ const Form = ({ mode }: FormProps) => {
       recados: [],
     };
     console.log(newUser);
+    //aqui eu atualizo a lista
+    //NAO USAMOS AQUI O GRAVAR NO LOCALSTORAGE PORQUE AQUI O PRIMEIRO SERÁ UMA LISTA VAZIA, ENTAO FAREMOS NO USEEFFECT
+    //pegando o que ja tinha e adicionando no final
+    /**ou setListaUsuarios(
+     *  (prev)=>[...prev, newUser] da no mesmo acima
+     * ) */
+    const userExists = listaUsuarios.some(
+      (user) => user.email === newUser.email
+    );
+    if (!userExists) {
+      setListaUsuarios([...listaUsuarios, newUser]);
+      clearInputs();
+      alert("Usuário cadastrado com sucesso!");
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+    } else {
+      alert("Email já em uso!");
+    }
+  };
+
+  //pois a logica é, quando mudar o listaUsuarios, dai ele muda o localStorage
+  //aqui eu seto no localstorage quando ela atualizar
+  useEffect(() => {
+    localStorage.setItem("listaUser", JSON.stringify(listaUsuarios));
+  }, [listaUsuarios]);
+
+  const login = ()
+
+  const clearInputs = () => {
+    setEmail("");
+    setPassword("");
+    setRepassword("");
   };
 
   return (
     <React.Fragment>
       {" "}
       <Stack spacing={2}>
-        {mode == "login" && (
+        {mode === "login" && (
           <>
             <InputDefault
               name='email'
@@ -117,13 +153,13 @@ const Form = ({ mode }: FormProps) => {
                 variant='caption'
                 onClick={() => outraPagina()}
               >
-                Cadastra-se
+                Cadastre-se
               </Typography>
             </Typography>
           </>
         )}
 
-        {mode == "signup" && (
+        {mode === "signup" && (
           <>
             <InputDefault
               name='email'
