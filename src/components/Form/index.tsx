@@ -9,6 +9,7 @@ interface FormProps {
 }
 
 const Form = ({ mode }: FormProps) => {
+  //ESTADOS
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -124,12 +125,12 @@ const Form = ({ mode }: FormProps) => {
       if (confirm) {
         navigate("/signup");
       }
-    }else{
-      localStorage.setItem("usuarioLogado", userExist.email as string);
+    } else {
+      localStorage.setItem("usuarioLogado", JSON.stringify(userExist));
       alert("Login efetuado com sucesso");
       setTimeout(() => {
-      navigate("/home");
-    }, 1500);
+        navigate("/home");
+      }, 1500);
     }
   };
 
