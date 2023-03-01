@@ -11,7 +11,7 @@ interface InputDefaultProps {
   color: "error" | "secondary";
 }
 
-export type Name = "name" | "email" | "password" | "repassword";
+export type Name = "name" | "email" | "password" | "repassword" | "description" | "details";
 
 //se eu fosse receber a funcao abaixo eu faria handleChange: ()=>React.ReactNode;
 const InputDefault: React.FC<InputDefaultProps> = ({
