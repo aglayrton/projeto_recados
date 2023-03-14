@@ -9,12 +9,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 import InputDefault, { Name } from "../../components/InputDefault";
+import Modal from "../../components/Modal";
 import { Recado } from "../../types/recadoType";
 import { User } from "../../types/userType";
 
@@ -27,7 +27,9 @@ const Home = () => {
   );
   const [description, setDescription] = useState("");
   const [detail, setDetail] = useState("");
-  const [id, setId] = useState("");
+  const [indiceSelecionado, SeIndiceSelecionado] = useState(-1); //é um indice invalido de array
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState("");
 
   const navigate = useNavigate();
 
@@ -83,10 +85,23 @@ const Home = () => {
     }
   };
 
-  const handleEdit = (id: string, description: string, details: string) => {
+  const handleEdit = (indice: number, description: string, details: string) => {
     setDescription(description);
     setDetail(details);
-    setId(id);
+    SeIndiceSelecionado(indice);
+    setMode("update");
+    setOpen(true);
+    handleClear();
+  };
+
+  const handleDelete = (indice: number) => {
+    SeIndiceSelecionado(indice);
+    setOpen(true);
+    setMode("delete");
+  };
+
+  const handleCloseModal = () => {
+    setOpen(false);
   };
 
   const handleClear = () => {
@@ -141,7 +156,7 @@ const Home = () => {
         </Grid>
         <Grid item xs={12} sm={2}>
           <Button variant='contained' color='success' onClick={handleSave}>
-            {id === "" ? "Salvar" : "Atualizar"}
+            Salvar
           </Button>
         </Grid>
       </Grid>
@@ -158,7 +173,7 @@ const Home = () => {
               </TableHead>
               <TableBody>
                 {userLogged &&
-                  userLogged.recados.map((row) => (
+                  userLogged.recados.map((row, index) => (
                     <TableRow
                       key={row.id}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -170,12 +185,16 @@ const Home = () => {
                           variant='text'
                           color='info'
                           onClick={() =>
-                            handleEdit(row.id, row.description, row.detail)
+                            handleEdit(index, row.description, row.detail)
                           }
                         >
                           Editar
                         </Button>
-                        <Button variant='text' color='error'>
+                        <Button
+                          variant='text'
+                          color='error'
+                          onClick={() => handleDelete(index)}
+                        >
                           Apagar
                         </Button>
                       </TableCell>
@@ -186,6 +205,17 @@ const Home = () => {
           </TableContainer>
         </Grid>
       </Grid>
+      {/**Modal sempre é chamdo no final */}
+      <Modal
+        indice={indiceSelecionado}
+        open={open}
+        handleClose={handleCloseModal}
+        user={userLogged as User}
+        setUser={setUserLogged}
+        mode={mode}
+        description={description}
+        detail={detail}
+      />
     </Box>
   );
 };
