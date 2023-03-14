@@ -32,6 +32,7 @@ const InputDefault: React.FC<InputDefaultProps> = ({
         type={type}
         variant='outlined'
         color={color}
+        fullWidth
       />
     </React.Fragment>
   );
