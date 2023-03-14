@@ -27,6 +27,7 @@ const Home = () => {
   );
   const [description, setDescription] = useState("");
   const [detail, setDetail] = useState("");
+  const [id, setId] = useState("");
 
   const navigate = useNavigate();
 
@@ -61,23 +62,22 @@ const Home = () => {
     }
   };
 
-  const handleSave = (id?: string, description?: string, detail?: string) => {
+  const handleSave = () => {
     if (description !== "" && detail !== "") {
       const novoRecado: Recado = {
         id: uuid(),
-        description: "1",
-        detail: "2",
+        description: description,
+        detail: detail,
       };
-      //userLogged?.recados.push(recado); nao da certo
       if (userLogged) {
-        //pego o que ja tem em ...userLogged, na sua chave recados eu pego o que tem la e ensiro o novo recado
+        //uso esse if para descartar a parte do undefined
         setUserLogged({
           ...userLogged,
-          recados: [...userLogged?.recados, novoRecado],
+          recados: [...userLogged.recados, novoRecado],
         });
-
-        alert("Recado salvo com sucesso!");
       }
+      handleClear();
+      alert("Recado salvo com sucesso!");
     } else {
       alert("Preencha os campos");
     }
@@ -86,7 +86,12 @@ const Home = () => {
   const handleEdit = (id: string, description: string, details: string) => {
     setDescription(description);
     setDetail(details);
-    handleSave(id, description, details);
+    setId(id);
+  };
+
+  const handleClear = () => {
+    setDescription("");
+    setDetail("");
   };
 
   return (
@@ -136,7 +141,7 @@ const Home = () => {
         </Grid>
         <Grid item xs={12} sm={2}>
           <Button variant='contained' color='success' onClick={handleSave}>
-            Salvar
+            {id === "" ? "Salvar" : "Atualizar"}
           </Button>
         </Grid>
       </Grid>
